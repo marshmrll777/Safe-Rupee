@@ -1,0 +1,203 @@
+import cv2
+import numpy as np
+from tkinter import *
+from tkinter import ttk, filedialog, messagebox
+from PIL import Image, ImageTk
+import joblib
+
+# Load pre-trained model
+model = None
+try:
+    model = joblib.load('currency_model.pkl')
+    print("Model loaded successfully")
+except Exception as e:
+    print(f"Error loading model: {e}")
+    model = None
+
+# Load reference images for 500 rupees note
+rbi_seal_templates_500 = [cv2.imread(f'rbi_seal_template_500_{i}.png', 0) for i in range(1, 7)]
+watermark_template_500 = cv2.imread('watermark_template_500.png', 0)
+security_thread_template_500 = cv2.imread('security_thread_template_500.png', 0)
+bleed_lines_template_500 = cv2.imread('bleed_lines_template_500.png', 0)
+ashoka_pillar_template_500 = cv2.imread('ashoka_pillar_template_500.png', 0)
+gandhi_portrait_template_500 = cv2.imread('gandhi_portrait_template_500.png', 0)
+guarantee_clause_template_500 = cv2.imread('guarantee_clause_template_500.png', 0)
+
+# Load reference images for 2000 rupees note
+rbi_seal_templates_2000 = [cv2.imread(f'rbi_seal_template_2000_{i}.png', 0) for i in range(1, 7)]
+watermark_template_2000 = cv2.imread('watermark_template_2000.png', 0)
+security_thread_template_2000 = cv2.imread('security_thread_template_2000.png', 0)
+bleed_lines_template_2000 = cv2.imread('bleed_lines_template_2000.png', 0)
+ashoka_pillar_template_2000 = cv2.imread('ashoka_pillar_template_2000.png', 0)
+gandhi_portrait_template_2000 = cv2.imread('gandhi_portrait_template_2000.png', 0)
+guarantee_clause_template_2000 = cv2.imread('guarantee_clause_template_2000.png', 0)
+
+# Global variables
+loaded_img = None
+option = -1
+path = ""
+
+# This function is called whenever a radio button is clicked
+def currency_type():
+    global option
+    option = int(var.get())
+
+# Load an image
+def load_image():
+    global loaded_img, canvas, path
+
+    canvas.delete("all")
+    path = filedialog.askopenfilename()
+
+    if len(path) > 0 and path.lower().endswith(('.jpeg', '.jpg', '.png')):
+        img = cv2.imread(path)
+        loaded_img = img.copy()
+
+        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img_resized = cv2.resize(img_rgb, (675, 300))
+
+        img_display = Image.fromarray(img_resized)
+        img_display = ImageTk.PhotoImage(img_display)
+
+        canvas.image = img_display
+        canvas.create_image(0, 0, anchor=NW, image=img_display)
+    else:
+        messagebox.showinfo("Warning", "Please choose an image! (Supported formats: .jpeg, .jpg, .png)")
+
+# Extract features for currency detection
+def extract_features(img):
+    global option
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    features = []
+
+    # Select templates based on selected currency type
+    if option == 1:  # 500 rupees
+        rbi_seal_templates = rbi_seal_templates_500
+        watermark_template = watermark_template_500
+        security_thread_template = security_thread_template_500
+        bleed_lines_template = bleed_lines_template_500
+        ashoka_pillar_template = ashoka_pillar_template_500
+        gandhi_portrait_template = gandhi_portrait_template_500
+        guarantee_clause_template = guarantee_clause_template_500
+    elif option == 2:  # 2000 rupees
+        rbi_seal_templates = rbi_seal_templates_2000
+        watermark_template = watermark_template_2000
+        security_thread_template = security_thread_template_2000
+        bleed_lines_template = bleed_lines_template_2000
+        ashoka_pillar_template = ashoka_pillar_template_2000
+        gandhi_portrait_template = gandhi_portrait_template_2000
+        guarantee_clause_template = guarantee_clause_template_2000
+    else:
+        messagebox.showwarning("Warning", "Please select a currency type!")
+        return None
+
+    # RBI Seal Detection
+    max_confidence = 0
+    try:
+        for template in rbi_seal_templates:
+            res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+            _, max_val, _, _ = cv2.minMaxLoc(res)
+            if max_val > max_confidence:
+                max_confidence = max_val
+        features.append(max_confidence)
+    except Exception as e:
+        print(f"Error detecting RBI seal: {e}")
+        features.append(0)
+
+    # Watermark Detection
+    try:
+        res = cv2.matchTemplate(gray, watermark_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting watermark: {e}")
+        features.append(0)
+
+    # Security Thread Detection
+    try:
+        res = cv2.matchTemplate(gray, security_thread_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting security thread: {e}")
+        features.append(0)
+
+    # Bleed Lines Detection
+    try:
+        res = cv2.matchTemplate(gray, bleed_lines_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting bleed lines: {e}")
+        features.append(0)
+
+    # Ashoka Pillar Detection
+    try:
+        res = cv2.matchTemplate(gray, ashoka_pillar_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting Ashoka pillar: {e}")
+        features.append(0)
+
+    # Gandhi Portrait Detection
+    try:
+        res = cv2.matchTemplate(gray, gandhi_portrait_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting Gandhi portrait: {e}")
+        features.append(0)
+
+    # Guarantee Clause Detection
+    try:
+        res = cv2.matchTemplate(gray, guarantee_clause_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        features.append(max_val)
+    except Exception as e:
+        print(f"Error detecting guarantee clause: {e}")
+        features.append(0)
+
+    return np.array(features).reshape(1, -1)
+
+# Predict currency authenticity
+def predict_currency():
+    global loaded_img
+    if loaded_img is not None:
+        features = extract_features(loaded_img)
+        if features is not None:
+            if model is not None:
+                try:
+                    prediction = model.predict(features)
+                    result = 'Genuine' if prediction[0] == 1 else 'Fake'
+                    messagebox.showinfo("Result", f"The currency is: {result}")
+                except Exception as e:
+                    messagebox.showerror("Error", f"Prediction error: {e}")
+            else:
+                messagebox.showerror("Error", "Model not loaded")
+    else:
+        messagebox.showwarning("Warning", "No image loaded")
+
+# Exit the application
+def exit_window():
+    root.destroy()
+
+# GUI
+root = Tk()
+root.title("Fake Indian Currency Detection System")
+root.geometry("1100x600")
+root.resizable(False, False)
+
+style = ttk.Style()
+style.configure("TLabel", font=("Helvetica", 12))
+style.configure("TButton", font=("Helvetica", 12), padding=6)
+style.configure("TRadiobutton", font=("Helvetica", 12))
+
+top_frame = Frame(root, bg='#1e3d59', width=1090, height=50, pady=3)
+frame1 = Frame(root, bg='#f5f0e1', width=1090, height=80, padx=3, pady=3)
+frame2 = Frame(root, bg='#f5f0e1', width=1090, height=400, pady=5, padx=5)
+frame3 = Frame(root, bg='#f5f0e1', width=1090, height=50, pady=3)
+frame4 = Frame(root, bg='#f5f0e1', width=1090, height=50, pady=3)
+
+top_frame.grid(row=1, column=1, padx=5, pady=5)
+frame1.grid(row=2, column

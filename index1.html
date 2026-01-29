@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KisanSaathi: Voice-Enabled Agri Platform</title>
+    <link rel="stylesheet" href="style1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <script>
+        // Define the function globally, ensuring the onclick can find it immediately
+        window.captureGPS = function() {
+            const gpsStatusElement = document.getElementById('gps-status');
+            const captureBtn = document.getElementById('capture-gps-btn');
+            
+            // 1. Show 'Capturing' state
+            gpsStatusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Capturing...';
+            captureBtn.disabled = true;
+            
+            // 2. Simulate delay for GPS lock
+            setTimeout(() => {
+                // Simulated GPS Data
+                const lat = (Math.random() * 5 + 18).toFixed(4); // Simulating realistic Indian coordinates
+                const lon = (Math.random() * 5 + 72).toFixed(4); // Simulating realistic Indian coordinates
+                
+                // 3. Update status to Success
+                gpsStatusElement.innerHTML = `<i class="fas fa-check-circle"></i> ${lat}°N, ${lon}°E`;
+                captureBtn.textContent = 'Location Captured';
+                captureBtn.style.backgroundColor = '#28a745'; // Green for success
+                
+                // Alert confirmation
+                alert(`Success! Field location captured: ${lat}°N, ${lon}°E. This data is now stored for hyperlocal weather and risk analysis.`);
+            }, 1500); // 1.5 second delay
+        }
+    </script>
+    </head>
+<body class="agri-background">
+<div id="login-page" class="login-container">
+    <h2><i class="fas fa-user"></i> Farmer Login</h2>
+
+    <form id="login-form">
+        <input type="text" id="farmer-name" placeholder="Farmer Name" required>
+        <input type="number" id="farmer-age" placeholder="Age" required>
+        <input type="text" id="farmer-mobile" placeholder="Mobile Number" required>
+
+        <h3>Farm Details</h3>
+        <input type="text" id="farm-location" placeholder="Village / District" required>
+        <input type="number" id="farm-area" placeholder="Farm Area (Acres)" required>
+        <input type="text" id="farm-crop" placeholder="Main Crop" required>
+
+        <button type="submit">Login & Enter Dashboard</button>
+    </form>
+</div>
+<div id="app" style="display:none;">
+
+    <div class="header">
+        <div class="logo">AgriVani</div>
+        <div class="title">Voice-Enabled Unified Agriculture Support Platform</div>
+        <div class="nav-tabs">
+            <a href="#dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="#chat"><i class="fas fa-comment-dots"></i> Voice Assistant</a>
+            <a href="#data"><i class="fas fa-database"></i> Market Data</a>
+            <a href="#map"><i class="fas fa-map-marker-alt"></i> Field/Weather</a>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="main-content active-view" id="dashboard">
+            <h2>Real-time Insights for Modern Farming</h2>
+            <div class="key-metrics">
+                <div class="metric">
+                    <p class="value" id="price-value">₹ 35.50 / Kg</p>
+                    <p class="label">Avg. Tomato Price (Local Mandi)</p>
+                </div>
+                <div class="metric">
+                    <p class="value"><i class="fas fa-sun"></i> 29°C</p>
+                    <p class="label">Local Weather Forecast</p>
+                </div>
+                <div class="metric gps-metric">
+                    <p class="value" id="gps-status"><i class="fas fa-location-arrow"></i> Not Captured</p>
+                    <p class="label">Field Coordinates Status</p>
+                    <button id="capture-gps-btn" onclick="captureGPS()" class="capture-btn">Capture My Location</button>
+                </div>
+                <div class="metric">
+                    <p class="value">8</p>
+                    <p class="label">Active Government Schemes</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-panel">
+                    <h3>Market Price Trends (Past 30 Days)</h3>
+                    <div class="chart-placeholder price-chart">
+                        <div class="chart-axis-y">
+                            <span style="top: 0%;">₹40</span>
+                            <span style="top: 25%;">₹35</span>
+                            <span style="top: 50%;">₹30</span>
+                            <span style="top: 75%;">₹25</span>
+                        </div>
+                        <div class="chart-line price-line"></div>
+                        <div class="chart-label current-price">Current: ₹35.50</div>
+                    </div>
+                </div>
+                <div class="chart-panel">
+                    <h3>Yield Prediction & Advisory Score</h3>
+                    <div class="chart-placeholder yield-chart">
+                        <div class="chart-axis-y">
+                            <span style="top: 0%;">High</span>
+                            <span style="top: 50%;">Medium</span>
+                            <span style="top: 100%;">Low</span>
+                        </div>
+                        <div class="chart-line yield-line"></div>
+                        <div class="chart-label advisory-score">Score: 85/100 (Excellent)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scheme-container">
+                <h3>Government Schemes & Support <i class="fas fa-hands-helping"></i></h3>
+                <div class="scheme-cards">
+                    <div class="scheme-card static-scheme" data-scheme="PMFBY">
+                        <h4><i class="fas fa-seedling"></i> Pradhan Mantri Fasal Bima Yojana (PMFBY)</h4>
+                        <p>Crop Insurance Scheme. Deadline: Nov 30.</p>
+                        <span class="status-indicator">Status: Active</span>
+                    </div>
+
+                    <div class="scheme-card static-scheme" data-scheme="KCC">
+                        <h4><i class="fas fa-credit-card"></i> Kisan Credit Card (KCC)</h4>
+                        <p>Access to credit and loans at low interest rates.</p>
+                        <span class="status-indicator">Status: Ongoing</span>
+                    </div>
+                </div>
+                <div id="scheme-status-message" class="info-message">Click on a scheme card to hear application details via Voice Assistant. (Feature active in final website)</div>
+            </div>
+            <div class="recent-alerts">
+                <h3>Recent Personalized Alerts <i class="fas fa-bell"></i></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Crop</th>
+                            <th>Alert Type</th>
+                            <th>Recommendation</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Wheat</td>
+                            <td>**Pest Warning**</td>
+                            <td>Apply fungicide 'X' within 48 hours due to high humidity forecast.</td>
+                            <td>30 min ago</td>
+                        </tr>
+                        <tr>
+                            <td>Tomatoes</td>
+                            <td>**Market Tip**</td>
+                            <td>Mandi 'A' is offering 5% higher price than 'B'. Consider selling tomorrow.</td>
+                            <td>1 hr ago</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="full-view" id="map">
+            <h2>Field/Weather Management System</h2>
+            
+            <div class="map-controls">
+                <div class="control-group">
+                    <label>Crop Type:</label>
+                    <select onchange="updateMapOverlay(this.value)">
+                        <option value="All">All Fields</option>
+                        <option value="Wheat">Wheat (Active)</option>
+                        <option value="Rice">Rice (Inactive)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Data Overlay:</label>
+                    <select onchange="updateMapOverlay(this.value)">
+                        <option value="Weather">Weather Radar</option>
+                        <option value="Pest">Pest Risk</option>
+                        <option value="Moisture">Soil Moisture</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Date Range:</label>
+                    <input type="date" value="2025-10-01"> to <input type="date" value="2025-10-07">
+                </div>
+                <button class="apply-filters"><i class="fas fa-filter"></i> Apply Filters</button>
+            </div>
+            
+            <div class="map-area-placeholder">
+                
+                <div class="map-overlay">
+                    <p class="forecast-title">Hyperlocal Forecast: 7-Day View</p>
+                    <div class="forecast-item">
+                        <i class="fas fa-cloud-sun"></i> <span>Today: 30°C / Sunny</span>
+                    </div>
+                    <div class="forecast-item warning">
+                        <i class="fas fa-cloud-showers-heavy"></i> <span>Fri: **Heavy Rain Alert** (50mm+)</span>
+                    </div>
+                    <div class="forecast-item">
+                        <i class="fas fa-fan"></i> <span>Sun: High Wind Warning</span>
+                    </div>
+                </div>
+
+                <div class="map-marker healthy" style="top: 60%; left: 30%;">
+                    <i class="fas fa-seedling"></i> Plot A (Wheat)
+                </div>
+                <div class="map-marker risk" style="top: 40%; left: 65%;">
+                    <i class="fas fa-exclamation-triangle"></i> Plot B (Pest Risk)
+                </div>
+                
+                <div class="field-icon-placeholder">
+                    <i class="fas fa-location-dot"></i> Your Farm
+                </div>
+            </div>
+            
+            <div class="legend-bar">
+                <span class="legend-item"><i class="fas fa-square" style="color:#008000;"></i> Healthy/Low Risk</span>
+                <span class="legend-item"><i class="fas fa-square" style="color:#ffcc00;"></i> Pest/Disease Advisory</span>
+                <span class="legend-item"><i class="fas fa-square" style="color:#d32f2f;"></i> Severe Weather/High Risk</span>
+            </div>
+        </div>
+        
+        <div class="chat-sidebar" id="chat">
+            <div class="chat-header">
+                <h3><i class="fas fa-microphone"></i> Voice Assistant (Ask Me Anything)</h3>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    Hello! I'm AgriVani, your AI assistant. Ask me about weather, crop diseases, or government schemes.
+                </div>
+            </div>
+            <div class="chat-input-area">
+    <textarea id="user-input" placeholder="Type or tap the mic to speak..." rows="2" disabled></textarea> 
+    <button id="mic-button" onclick="handleVoiceInput()">
+        <i class="fas fa-microphone"></i>
+    </button>
+</div>
+            <div class="quick-queries">
+                <h4>Quick Queries (Tap to ask)</h4>
+                <span class="query-tag" onclick="sendQuickQuery('What is the best pesticide for cotton?')">Pesticide for Cotton?</span>
+                <span class="query-tag" onclick="sendQuickQuery('Show scheme details for crop insurance.')">Crop Insurance Scheme?</span>
+                <span class="query-tag" onclick="sendQuickQuery('What is the market price for corn today?')">Corn Price Today?</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
